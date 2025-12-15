@@ -4,10 +4,10 @@ Secure, versioned REST API for the MentWel Digital Mental Health Platform with a
 
 ## 🚀 Live Deployment
 
-**Production API:** https://plp-final-project-backend.onrender.com
+**Production API:** 
 
-- **Health Check:** https://plp-final-project-backend.onrender.com/health
-- **API Base URL:** https://plp-final-project-backend.onrender.com/api/v1
+- **Health Check:** 
+- **API Base URL:** 
 - **API Documentation:** Available in development mode only
 
 ## Features
@@ -56,8 +56,8 @@ See `.env.example`. Important keys:
 ## API Endpoints
 
 ### Production URLs
-- **Health check:** `GET https://plp-final-project-backend.onrender.com/health`
-- **API base:** `https://plp-final-project-backend.onrender.com/api/v1`
+- **Health check:** 
+- **API base:** 
 
 ### Authentication Endpoints
 - **Register:** `POST /api/v1/auth/register`
@@ -114,7 +114,7 @@ backend/
 ## Deployment
 
 ### Production Environment (Render)
-- **URL:** https://plp-final-project-backend.onrender.com
+- **URL:** 
 - **Database:** MongoDB Atlas
 - **Environment:** Production mode with optimized settings
 - **Email Verification:** Configurable via `REQUIRE_EMAIL_VERIFICATION` environment variable
@@ -126,7 +126,7 @@ NODE_ENV=production
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database
 JWT_SECRET=your-secure-jwt-secret
 CLIENT_URL=https://your-frontend-domain.com
-SERVER_URL=https://plp-final-project-backend.onrender.com
+SERVER_URL=
 REQUIRE_EMAIL_VERIFICATION=false
 ```
 
