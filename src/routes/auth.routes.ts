@@ -8,6 +8,16 @@ import rateLimit from 'express-rate-limit';
 
 const router = Router();
 
+// Test route to verify auth routes are working
+router.get('/test', (_req, res) => {
+  res.json({ message: 'Auth routes are working!' });
+});
+
+// Simple POST test route
+router.post('/test-post', (_req, res) => {
+  res.json({ message: 'POST request working!', body: _req.body });
+});
+
 // Rate limit: 5 attempts/hour/IP for registration
 const registerLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 5, standardHeaders: true, legacyHeaders: false });
 

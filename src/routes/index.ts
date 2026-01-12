@@ -45,7 +45,9 @@ router.use('/notifications', authenticate, notificationRoutes);
 
 // Export the router
 const registerRoutes = (app: express.Application) => {
+  console.log('Registering routes at /api/v1...');
   app.use('/api/v1', router);
+  console.log('Routes registered successfully');
 };
 
 export { registerRoutes };
