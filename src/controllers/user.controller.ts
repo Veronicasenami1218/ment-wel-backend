@@ -11,6 +11,19 @@ import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { API_BASE_URL, SERVER_URL } from '../config';
 
 /**
+ * GET /users/me
+ * Returns the freshly-loaded profile of the authenticated user. The frontend
+ * calls this on app boot to hydrate its cached user object with any changes
+ * (role, status, profile picture, etc.) that happened on the server.
+ */
+export const getCurrentUser = async (req: AuthenticatedRequest, res: Response) => {
+  if (!req.user) throw ApiError.unauthorized();
+  const user = await User.findById(req.user.id).lean();
+  if (!user) throw ApiError.notFound('User not found');
+  res.status(StatusCodes.OK).json({ success: true, data: { user } });
+};
+
+/**
  * PUT /users/profile
  */
 export const updateProfile = async (req: AuthenticatedRequest, res: Response) => {

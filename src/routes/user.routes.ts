@@ -6,6 +6,9 @@ import * as userController from '../controllers/user.controller';
 
 const router = Router();
 
+// GET /users/me — return fresh server-side profile of the authenticated user
+router.get('/me', userController.getCurrentUser);
+
 // PUT /users/profile
 router.put(
   '/profile',
@@ -41,7 +44,7 @@ router.post(
 // POST /users/profile-picture
 router.post(
   '/profile-picture',
-  uploadProfilePicture.single('file'),
+  uploadProfilePicture.single('profilePicture'),
   userController.uploadProfilePicture
 );
 

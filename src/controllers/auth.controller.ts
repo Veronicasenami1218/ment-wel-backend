@@ -234,10 +234,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
  */
 export const refreshToken = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { refreshToken } = req.body;
+    const { refreshToken: oldRefreshToken } = req.body;
 
     // Verify refresh token
-    const payload = jwt.verify(refreshToken, JWT_SECRET) as {
+    const payload = jwt.verify(oldRefreshToken, JWT_SECRET) as {
       userId: string;
       role: UserRole;
       sessionId: string;
@@ -245,7 +245,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
 
     // Check if token exists in database
     const token = await Token.findOne({
-      token: refreshToken,
+      token: oldRefreshToken,
       user: payload.userId,
       expiresAt: { $gt: new Date() },
     });
@@ -254,13 +254,25 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
       throw new ApiError(StatusCodes.UNAUTHORIZED, 'Invalid refresh token');
     }
 
-    // Generate new access token
-    const accessToken = generateAccessToken(payload.userId, payload.role, payload.sessionId);
+    // Rotate: issue a brand-new pair AND invalidate the old refresh token row
+    // so a stolen refresh token can only be used at most once.
+    const { accessToken, refreshToken: newRefreshToken } = generateTokens(
+      payload.userId,
+      payload.role
+    );
+
+    await Token.deleteOne({ _id: token._id });
+    await Token.create({
+      token: newRefreshToken,
+      user: payload.userId,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
 
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
         accessToken,
+        refreshToken: newRefreshToken,
         expiresIn: JWT_ACCESS_EXPIRATION,
       },
     });

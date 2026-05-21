@@ -16,14 +16,33 @@ router.get(
   sessionController.getSessionById
 );
 
-// POST /sessions
+// POST /sessions — accepts camelCase (preferred) or snake_case (legacy).
 router.post(
   '/',
   [
-    body('therapist_id').isMongoId().withMessage('Valid therapist_id is required'),
-    body('scheduled_at').isISO8601().withMessage('Valid scheduled_at ISO date is required'),
-    body('duration').optional().isInt({ min: 5, max: 600 }),
-    body('session_type').optional().isIn(['text', 'voice', 'video']),
+    body().custom((value) => {
+      const therapistId = value?.therapistId ?? value?.therapist_id;
+      const scheduledAt = value?.scheduledAt ?? value?.scheduled_at;
+      if (!therapistId) throw new Error('therapistId is required');
+      if (!scheduledAt) throw new Error('scheduledAt is required');
+      if (!/^[0-9a-fA-F]{24}$/.test(String(therapistId))) {
+        throw new Error('therapistId must be a valid id');
+      }
+      if (Number.isNaN(Date.parse(String(scheduledAt)))) {
+        throw new Error('scheduledAt must be a valid ISO date');
+      }
+      const sessionType = value?.sessionType ?? value?.session_type;
+      if (sessionType && !['text', 'voice', 'video'].includes(sessionType)) {
+        throw new Error('sessionType must be one of: text, voice, video');
+      }
+      if (value?.duration !== undefined) {
+        const d = Number(value.duration);
+        if (!Number.isFinite(d) || d < 5 || d > 600) {
+          throw new Error('duration must be between 5 and 600 minutes');
+        }
+      }
+      return true;
+    }),
   ],
   validateRequest,
   sessionController.createSession

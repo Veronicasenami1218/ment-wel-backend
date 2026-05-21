@@ -3,17 +3,22 @@ import { StatusCodes } from 'http-status-codes';
 import { Therapist } from '../models/Therapist';
 import { ApiError } from '../utils/ApiError';
 
+/**
+ * Map a Therapist document into the camelCase JSON contract the frontend
+ * expects. We keep the underlying schema fields in snake_case for legacy
+ * reasons but always serialize them to camelCase on the way out.
+ */
 const serialize = (t: any) => ({
   id: t._id,
-  first_name: t.first_name,
-  last_name: t.last_name,
+  firstName: t.first_name,
+  lastName: t.last_name,
   email: t.email,
   specializations: t.specializations,
   bio: t.bio,
-  experience_years: t.experience_years,
+  experienceYears: t.experience_years,
   rating: t.rating,
   availability: t.availability,
-  profile_image: t.profile_image,
+  profileImage: t.profile_image,
 });
 
 /**

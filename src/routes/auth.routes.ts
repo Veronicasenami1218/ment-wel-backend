@@ -18,8 +18,12 @@ router.post('/test-post', (_req, res) => {
   res.json({ message: 'POST request working!', body: _req.body });
 });
 
-// Rate limit: 5 attempts/hour/IP for registration
-const registerLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 5, standardHeaders: true, legacyHeaders: false });
+// Rate limit: 5 attempts/hour/IP for registration (production only).
+// In dev/test the limit is too painful while iterating, so we bypass it.
+const registerLimiter =
+  process.env.NODE_ENV === 'production'
+    ? rateLimit({ windowMs: 60 * 60 * 1000, max: 5, standardHeaders: true, legacyHeaders: false })
+    : ((_req: any, _res: any, next: any) => next());
 
 // User registration (email or phone)
 router.post(
@@ -75,7 +79,9 @@ router.post(
       .optional()
       .isIn(Object.values(Country))
       .withMessage('Country must be one of: Nigeria, Ghana, Kenya, South Africa, Other'),
-    body('acceptTerms').equals('true').withMessage('You must accept the Terms of Service and Privacy Policy'),
+    body('acceptTerms')
+      .custom((v) => v === true || v === 'true')
+      .withMessage('You must accept the Terms of Service and Privacy Policy'),
     body('role')
       .optional()
       .isIn([UserRole.USER, UserRole.THERAPIST])

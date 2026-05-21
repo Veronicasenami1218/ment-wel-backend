@@ -4,13 +4,18 @@ import { TherapySession } from '../models/TherapySession';
 import { ApiError } from '../utils/ApiError';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
+/**
+ * Map a TherapySession document to the camelCase JSON contract the frontend
+ * consumes. We keep the underlying mongoose field names (snake_case) for
+ * historical reasons but never leak them to clients.
+ */
 const serialize = (s: any) => ({
   id: s._id,
-  user_id: s.user_id,
-  therapist_id: s.therapist_id,
-  scheduled_at: s.scheduled_at,
+  userId: s.user_id,
+  therapistId: s.therapist_id,
+  scheduledAt: s.scheduled_at,
   duration: s.duration,
-  session_type: s.session_type,
+  sessionType: s.session_type,
   status: s.status,
   notes: s.notes,
 });
@@ -41,17 +46,25 @@ export const getSessionById = async (req: AuthenticatedRequest, res: Response) =
 
 /**
  * POST /sessions
+ * Accepts both camelCase (preferred) and snake_case (legacy) inputs.
  */
 export const createSession = async (req: AuthenticatedRequest, res: Response) => {
   if (!req.user) throw ApiError.unauthorized();
-  const { therapist_id, scheduled_at, duration, session_type } = req.body;
+  const body = req.body || {};
+  const therapistId = body.therapistId ?? body.therapist_id;
+  const scheduledAt = body.scheduledAt ?? body.scheduled_at;
+  const duration = body.duration;
+  const sessionType = body.sessionType ?? body.session_type;
+
+  if (!therapistId) throw ApiError.badRequest('therapistId is required');
+  if (!scheduledAt) throw ApiError.badRequest('scheduledAt is required');
 
   const session = await TherapySession.create({
     user_id: req.user.id,
-    therapist_id,
-    scheduled_at,
+    therapist_id: therapistId,
+    scheduled_at: scheduledAt,
     duration: duration || 60,
-    session_type: session_type || 'video',
+    session_type: sessionType || 'video',
     status: 'scheduled',
   });
 
