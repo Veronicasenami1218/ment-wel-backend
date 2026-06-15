@@ -16,9 +16,7 @@ const config: Config = {
   testTimeout: 30000, // 30 seconds for MongoDB setup
   transform: {
     '^.+\\.ts$': ['ts-jest', {
-      tsconfig: {
-        types: ['node', 'jest']
-      }
+      tsconfig: './tsconfig.test.json'
     }],
   },
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
