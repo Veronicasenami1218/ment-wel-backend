@@ -14,16 +14,16 @@ export const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 export const JWT_ACCESS_EXPIRATION = process.env.JWT_ACCESS_EXPIRATION || '15m';
 export const JWT_REFRESH_EXPIRATION = process.env.JWT_REFRESH_EXPIRATION || '7d';
 
-export const CLIENT_URL = process.env.CLIENT_URL || 'https://plp-ment-wel.netlify.app';
+export const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 export const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
 export const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}/api/v1`;
 
-export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+export const REDIS_URL = process.env.REDIS_URL || '';
 export const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET || '';
 
-export const ORIGIN = NODE_ENV === 'production' 
-  ? [CLIENT_URL, SERVER_URL, 'https://plp-ment-wel.netlify.app'] 
-  : ['http://localhost:3000', 'http://localhost:8000', `http://localhost:${PORT}`, 'https://plp-ment-wel.netlify.app'];
+export const ORIGIN = NODE_ENV === 'production'
+  ? [CLIENT_URL, SERVER_URL]
+  : ['http://localhost:3000', 'http://localhost:8000', `http://localhost:${PORT}`];
 
 export const CREDENTIALS = process.env.CREDENTIALS === 'true';
 

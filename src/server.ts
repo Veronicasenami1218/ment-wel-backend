@@ -77,8 +77,8 @@ class App {
     // Security middleware
     this.app.use(helmet());
     
-    // CORS configuration with explicit origins.
-    // Extra origins can be added via the CORS_ORIGINS env var (comma-separated).
+    // CORS — base origins come from config; extra origins can be added
+    // via the CORS_ORIGINS env var (comma-separated) without touching code.
     const extraOrigins = (process.env.CORS_ORIGINS || '')
       .split(',')
       .map((s) => s.trim())
@@ -86,11 +86,11 @@ class App {
 
     const corsOptions = {
       origin: [
-        'https://plp-ment-wel.netlify.app',
         'http://localhost:3000',
         'http://localhost:8000',
         'http://localhost:5000',
         ...extraOrigins,
+        ...(ORIGIN as string[]),
       ],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -199,15 +199,11 @@ class App {
   }
 }
 
-// Create and start the server
 console.log('Starting MentWel Backend...');
-console.log('Environment Variables Check:');
 console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('PORT:', process.env.PORT);
-console.log('CLIENT_URL:', process.env.CLIENT_URL);
+console.log('PORT:', process.env.PORT || 5000);
 console.log('MONGODB_URI exists:', !!process.env.MONGODB_URI);
 console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
-console.log('CORS Origins configured for:', ['https://plp-ment-wel.netlify.app', 'http://localhost:3000', 'http://localhost:8000', 'http://localhost:5000']);
 
 const app = new App();
 app.initialize().then(() => {
