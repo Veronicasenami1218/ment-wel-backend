@@ -1,14 +1,12 @@
 import { Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import bcrypt from 'bcryptjs';
-import path from 'path';
-import fs from 'fs';
+import { v2 as cloudinary } from 'cloudinary';
 import { User } from '../models/User';
 import { Token } from '../models/Token';
 import { ApiError } from '../utils/ApiError';
 import { logger } from '../utils/logger';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
-import { API_BASE_URL, SERVER_URL } from '../config';
 
 /**
  * GET /users/me
@@ -74,36 +72,47 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response) =
 
 /**
  * POST /users/profile-picture
+ * Uploads to Cloudinary — persists across server restarts and deploys.
  */
 export const uploadProfilePicture = async (req: AuthenticatedRequest, res: Response) => {
   try {
     if (!req.user) throw ApiError.unauthorized();
-    const file = (req as any).file as Express.Multer.File | undefined;
+    const file = (req as any).file as (Express.Multer.File & { path?: string; filename?: string }) | undefined;
     if (!file) throw ApiError.badRequest('No file uploaded');
 
-    // Public URL served from /uploads
-    const publicUrl = `${SERVER_URL.replace(/\/$/, '')}/uploads/profile-pictures/${file.filename}`;
+    // Cloudinary returns the secure URL in file.path
+    const newUrl: string = (file as any).path;
 
     const user = await User.findById(req.user.id);
     if (!user) throw ApiError.notFound('User not found');
 
-    // Remove old picture file if exists locally
+    // Delete old Cloudinary image to keep storage clean
     if (user.profilePicture) {
-      const oldPath = path.join(
-        process.cwd(),
-        'uploads',
-        'profile-pictures',
-        path.basename(user.profilePicture)
-      );
-      fs.promises.unlink(oldPath).catch(() => undefined);
+      try {
+        // Extract public_id from the old Cloudinary URL
+        const urlParts = user.profilePicture.split('/');
+        const uploadIndex = urlParts.indexOf('upload');
+        if (uploadIndex !== -1) {
+          // Strip version segment (v12345) if present
+          const afterUpload = urlParts.slice(uploadIndex + 1);
+          if (afterUpload[0]?.startsWith('v') && /^\d+$/.test(afterUpload[0].slice(1))) {
+            afterUpload.shift();
+          }
+          const publicIdWithExt = afterUpload.join('/');
+          const publicId = publicIdWithExt.replace(/\.[^/.]+$/, ''); // remove extension
+          await cloudinary.uploader.destroy(publicId);
+        }
+      } catch {
+        // Don't fail the upload if old image deletion fails
+      }
     }
 
-    user.profilePicture = publicUrl;
+    user.profilePicture = newUrl;
     await user.save();
 
     res.status(StatusCodes.OK).json({
       success: true,
-      data: { profilePicture: publicUrl },
+      data: { profilePicture: newUrl },
     });
   } catch (error) {
     logger.error('Upload profile picture error:', error);

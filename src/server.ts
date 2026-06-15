@@ -101,9 +101,6 @@ class App {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(compression());
-
-    // Static uploads (profile pictures, etc.)
-    this.app.use('/uploads', express.static('uploads'));
     
     // Request logging
     this.app.use(morgan(LOG_FORMAT, { stream }));
