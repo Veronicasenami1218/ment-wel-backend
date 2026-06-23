@@ -38,7 +38,7 @@ const UserSchema = new Schema<IUser>(
     resetPasswordExpires: { type: Date },
     status: { type: String, enum: Object.values(UserStatus), default: UserStatus.ACTIVE },
     dateOfBirth: { type: Date, required: true },
-    gender: { type: String, enum: Object.values(Gender), required: true },
+    gender: { type: String, enum: Object.values(Gender), default: Gender.PREFER_NOT_TO_SAY },
     country: { type: String, enum: Object.values(Country), default: Country.NIGERIA },
     acceptedTermsAt: { type: Date },
     profilePicture: { type: String },

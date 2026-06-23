@@ -41,7 +41,7 @@ export const initializeDatabase = async (): Promise<void> => {
     const isAtlas = MONGODB_URI.includes('mongodb+srv') || MONGODB_URI.includes('mongodb.net');
 
     const options = {
-      serverSelectionTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 120000,
       socketTimeoutMS: 45000,
     };
 

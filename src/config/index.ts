@@ -5,11 +5,17 @@ export const LOG_FORMAT = process.env.LOG_FORMAT || 'dev';
 
 // MONGODB_URI must be set — no localhost fallback allowed
 if (!process.env.MONGODB_URI) {
-  console.error('FATAL: MONGODB_URI environment variable is not set.');
-  console.error('Set it in your .env file (Atlas connection string) or in your deployment environment variables.');
-  process.exit(1);
+  if (NODE_ENV === 'test') {
+    // During tests use a local test database (developer should ensure test DB or mongodb-memory-server is available)
+    process.env.MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/mentwel-test';
+    console.warn('MONGODB_URI not set; using fallback test DB for NODE_ENV=test');
+  } else {
+    console.error('FATAL: MONGODB_URI environment variable is not set.');
+    console.error('Set it in your .env file (Atlas connection string) or in your deployment environment variables.');
+    process.exit(1);
+  }
 }
-export const MONGODB_URI = process.env.MONGODB_URI;
+export const MONGODB_URI = process.env.MONGODB_URI as string;
 
 export const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 export const JWT_ACCESS_EXPIRATION = process.env.JWT_ACCESS_EXPIRATION || '15m';

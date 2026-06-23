@@ -1,5 +1,7 @@
 import request from 'supertest';
 import { expressApp } from '../src/test-app';
+import { describe, it } from 'node:test';
+import expect from 'expect';
 
 describe('Health Check', () => {
   it('GET /health should return ok', async () => {
@@ -8,3 +10,4 @@ describe('Health Check', () => {
     expect(res.body.status).toBe('ok');
   });
 });
+

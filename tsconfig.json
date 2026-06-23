@@ -7,14 +7,16 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node16",
     "resolveJsonModule": true,
+    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["node"],
+    "types": ["node", "jest"],
     "typeRoots": [
       "./node_modules/@types",
       "./src/@types"

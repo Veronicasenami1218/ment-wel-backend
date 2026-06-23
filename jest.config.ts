@@ -13,7 +13,7 @@ const config: Config = {
     '!src/**/types.ts',
   ],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
-  testTimeout: 30000, // 30 seconds for MongoDB setup
+  testTimeout: 300000, // 5 minutes to allow mongo-memory-server downloads/setup
   transform: {
     '^.+\\.ts$': ['ts-jest', {
       tsconfig: './tsconfig.test.json'

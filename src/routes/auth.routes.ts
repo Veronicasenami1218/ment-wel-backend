@@ -60,9 +60,9 @@ router.post(
       .withMessage('Password must contain at least one number')
       .matches(/[^A-Za-z0-9]/)
       .withMessage('Password must contain at least one special character'),
+    // Confirm password is optional in some clients; when provided it must match
     body('confirmPassword')
-      .notEmpty()
-      .withMessage('Confirm password is required')
+      .optional()
       .custom((value, { req }) => {
         if (value !== req.body.password) {
           throw new Error('Passwords do not match');
@@ -72,7 +72,9 @@ router.post(
     body('firstName').notEmpty().withMessage('First name is required'),
     body('lastName').notEmpty().withMessage('Last name is required'),
     body('dateOfBirth').isISO8601().toDate().withMessage('Valid date of birth is required'),
+    // Gender is optional; if provided it must be one of the allowed values
     body('gender')
+      .optional()
       .isIn(Object.values(Gender))
       .withMessage('Gender must be one of: male, female, other, prefer_not_to_say'),
     body('country')

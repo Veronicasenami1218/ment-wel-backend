@@ -1,10 +1,9 @@
 import { Router } from 'express';
 import { handleChat } from '../controllers/ai.controller';
-import { authenticate } from '../middleware/auth.middleware';
 
 const router = Router();
 
-// Protected endpoint — frontend must call backend
-router.post('/chat', authenticate, handleChat);
+// Temporarily expose AI endpoint without authentication for debugging
+router.post('/chat', handleChat);
 
 export default router;

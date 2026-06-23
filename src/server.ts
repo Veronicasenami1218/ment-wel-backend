@@ -13,10 +13,9 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { StatusCodes } from 'http-status-codes';
 import rateLimit from 'express-rate-limit';
-import RedisStore from 'rate-limit-redis';
 import { createClient } from 'redis';
 import { initializeDatabase } from './config/database';
-import { errorHandler } from './middleware/error.middleware';
+import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { logger, stream } from './utils/logger';
 import { ApiError } from './utils/ApiError';
 import { initializeSocket } from './socket';
@@ -131,6 +130,11 @@ class App {
   }
 
   private async initializeRateLimiting() {
+    // Disable rate limiting during development to avoid Redis-related crashes while debugging
+    if (this.env === 'development' || process.env.DISABLE_RATE_LIMIT === 'true') {
+      logger.warn('Rate limiting disabled (development or DISABLE_RATE_LIMIT=true)');
+      return;
+    }
     const defaultLimiter = rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
       max: 100,
@@ -144,12 +148,16 @@ class App {
         const redisClient = createClient({ url: process.env.REDIS_URL });
         await redisClient.connect();
 
+        // Dynamically import RedisStore to avoid ESM/CJS import issues during build
+        const RedisStoreModule = await import('rate-limit-redis');
+        const RedisStoreCtor = (RedisStoreModule as any).default || RedisStoreModule;
+
         const limiter = rateLimit({
           windowMs: 15 * 60 * 1000,
           max: 100,
           standardHeaders: true,
           legacyHeaders: false,
-          store: new RedisStore({
+          store: new (RedisStoreCtor as any)({
             sendCommand: (...args: string[]) => redisClient.sendCommand(args),
           }),
           message: 'Too many requests from this IP, please try again after 15 minutes',
@@ -181,9 +189,7 @@ class App {
     }
 
     // 404 handler for non-existent routes (must be after routes)
-    this.app.use((_req: Request, _res: Response, next: NextFunction) => {
-      next(new ApiError(StatusCodes.NOT_FOUND, 'Not Found'));
-    });
+    this.app.use(notFoundHandler);
   }
 
   private initializeErrorHandling() {

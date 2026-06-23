@@ -148,8 +148,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       data: {
         user,
         tokens: {
-          accessToken,
-          refreshToken,
+          access: { token: accessToken },
+          refresh: { token: refreshToken },
         },
       },
     });
@@ -218,14 +218,24 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       data: {
         user,
         tokens: {
-          accessToken,
-          refreshToken,
+          access: { token: accessToken },
+          refresh: { token: refreshToken },
         },
       },
     });
   } catch (error) {
     logger.error('Login error:', error);
-    throw error;
+
+    if (res.headersSent) return;
+
+    if (error instanceof ApiError) {
+      res.status(error.statusCode).json({ success: false, message: error.message });
+    } else {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Login failed. Please try again.',
+      });
+    }
   }
 };
 
@@ -567,8 +577,8 @@ export const clerkSync = async (req: Request, res: Response): Promise<void> => {
       data: {
         user,
         tokens: {
-          accessToken,
-          refreshToken,
+          access: { token: accessToken },
+          refresh: { token: refreshToken },
         },
       },
     });
