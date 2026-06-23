@@ -88,20 +88,42 @@ class App {
       .map((s) => s.trim())
       .filter(Boolean);
 
+    // Build a list of allowed origins and a runtime validator so we can return
+    // the appropriate Access-Control-Allow-Origin header when credentials are used.
+    const allowedOrigins = Array.from(new Set([
+      'http://localhost:3000',
+      'http://localhost:8000',
+      'http://localhost:5000',
+      ...extraOrigins,
+      ...(ORIGIN as string[]),
+    ].filter(Boolean)));
+
     const corsOptions = {
-      origin: [
-        'http://localhost:3000',
-        'http://localhost:8000',
-        'http://localhost:5000',
-        ...extraOrigins,
-        ...(ORIGIN as string[]),
-      ],
+      origin: (incomingOrigin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+        // Allow non-browser requests (e.g. curl, server-to-server) with no origin
+        if (!incomingOrigin) return callback(null, true);
+
+        // If origin is in allowed list, permit it
+        if (allowedOrigins.includes(incomingOrigin)) return callback(null, true);
+
+        // Fallback: allow same-origin or allow when environment explicitly enables CORS_ALL
+        if (process.env.CORS_ALLOW_ALL === 'true') return callback(null, true);
+
+        // Otherwise reject
+        return callback(new Error(`Origin ${incomingOrigin} not allowed by CORS`));
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     };
-    
-    this.app.use(cors(corsOptions));
+
+    this.app.use((req, res, next) => {
+      // Short-circuit OPTIONS to ensure preflight returns correct headers quickly
+      if (req.method === 'OPTIONS') {
+        return cors(corsOptions)(req, res, next);
+      }
+      return cors(corsOptions)(req, res, next);
+    });
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(compression());
