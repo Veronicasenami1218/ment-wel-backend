@@ -219,11 +219,9 @@ class App {
   }
 
   public listen() {
-    const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
-    this.httpServer.listen({
-      port: this.port,
-      host: host
-    }, () => {
+    // Bind to 0.0.0.0 so hosting platforms (Render, Heroku) can reach the service
+    const host = '0.0.0.0';
+    this.httpServer.listen({ port: this.port, host }, () => {
       logger.info(`=================================`);
       logger.info(`======= ENV: ${this.env} =======`);
       logger.info(`🚀 App listening on ${host}:${this.port}`);
