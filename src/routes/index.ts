@@ -64,6 +64,9 @@ router.use('/resources', resourceRoutes);
 // Export the router
 const registerRoutes = (app: express.Application) => {
   console.log('Registering routes at /api/v1...');
+  // Mount legacy root `/auth` for clients that use that path (keeps compatibility)
+  app.use('/auth', authRoutes);
+
   app.use('/api/v1', router);
   console.log('Routes registered successfully');
 };
