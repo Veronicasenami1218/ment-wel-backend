@@ -1,0 +1,52 @@
+--pending adjustments--
+
+src/routes/auth.routes.ts	===
+src/models/User.ts		===
+src/models/ChatMessage.ts	===
+src/server.ts			===
+
+
+--New files added--
+
+src/validations/auth.validation.ts
+src/middleware/request-id.middleware.ts
+src/middleware/metrics.middleware.ts
+src/types/index.ts
+src/@types/swagger-jsdoc.d.ts
+
+src/services/auth.service.ts
+src/services/user.service.ts
+src/services/session.service.ts
+src/services/cache.service.ts
+
+src/config/index.ts
+src/config/database.ts
+src/config/swagger.ts
+
+
+src/utils/logger.ts
+src/utils/ApiError.ts
+src/utils/emailTemplates.ts
+
+
+src/
+├── validations/
+│   └── auth.validation.ts          # NEW
+├── middleware/
+│   ├── request-id.middleware.ts    # NEW
+│   └── metrics.middleware.ts       # NEW
+├── routes/
+│   └── auth.routes.ts              # UPDATED
+├── models/
+│   ├── User.ts                     # UPDATED
+│   └── ChatMessage.ts              # UPDATED
+├── server.ts                       # UPDATED
+├── services/                       # RECOMMENDED (not yet created)
+│   ├── auth.service.ts
+│   ├── user.service.ts
+│   └── cache.service.ts
+├── dtos/                           # RECOMMENDED (not yet created)
+│   ├── auth.dto.ts
+│   └── user.dto.ts
+└── types/
+    └── index.ts                    # Should be updated

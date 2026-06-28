@@ -1,16 +1,27 @@
-import { NextFunction, Request, Response } from 'express';
-import { validationResult } from 'express-validator';
+// src/middleware/validate.middleware.ts
+import { Request, Response, NextFunction } from 'express';
+import { AnyZodObject, ZodError } from 'zod';
 import { StatusCodes } from 'http-status-codes';
+import { ApiError } from '../utils/ApiError';
 
-export const validateRequest = (req: Request, res: Response, next: NextFunction): void => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(StatusCodes.BAD_REQUEST).json({
-      success: false,
-      message: 'Validation failed',
-      errors: errors.array().map((e: any) => ({ field: e.path ?? e.param, message: e.msg })),
-    });
-    return;
-  }
-  next();
+export const validate = (schema: AnyZodObject) => {
+  return async (req: Request, _res: Response, next: NextFunction) => {
+    try {
+      await schema.parseAsync({
+        body: req.body,
+        query: req.query,
+        params: req.params,
+      });
+      next();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const errors = error.errors.map((e) => ({
+          field: e.path.join('.'),
+          message: e.message,
+        }));
+        throw new ApiError(StatusCodes.BAD_REQUEST, 'Validation Error', errors);
+      }
+      next(error);
+    }
+  };
 };
